@@ -83,8 +83,7 @@ public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin {
             return
         }
         
-        let response = flutterSecureStorageManager.write(key: values.key!, value: values.value!, groupId: values.groupId, accountName: values.accountName, synchronizable: values.synchronizable, accessibility: values.accessibility)
-        
+        let response = flutterSecureStorageManager.write(key: values.key!, value: values.value!, groupId: values.groupId, accountName: values.accountName, synchronizable: values.synchronizable, accessibility: values.accessibility, accessControl: values.accessControl)
         let error = SecureStorageError.fromOSStatus(key: values.key, oSStatus: response)
         if error == nil {
             result(response)
