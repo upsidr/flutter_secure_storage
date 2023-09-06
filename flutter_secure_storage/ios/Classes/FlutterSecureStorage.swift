@@ -9,7 +9,7 @@ import Foundation
 
 class FlutterSecureStorage{
     
-    private func baseQuery(key: String?, groupId: String?, accountName: String?, synchronizable: Bool?, returnData: Bool?) -> Dictionary<CFString, Any> {
+    private func baseQuery(key: String?, groupId: String?, accountName: String?, synchronizable: Bool?, returnData: Bool?, accessControl: SecAccessControl?) -> Dictionary<CFString, Any> {
         var keychainQuery: [CFString: Any] = [kSecClass : kSecClassGenericPassword]
         if (key != nil) {
             keychainQuery[kSecAttrAccount] = key
@@ -30,6 +30,10 @@ class FlutterSecureStorage{
         
         if (returnData != nil) {
             keychainQuery[kSecReturnData] = returnData
+        }
+
+        if (accessControl != nil) {
+            keychainQuery[kSecAttrAccessControl] = accessControl
         }
         return keychainQuery
     }
@@ -96,7 +100,7 @@ class FlutterSecureStorage{
         return SecItemDelete(keychainQuery as CFDictionary)
     }
     
-    internal func write(key: String, value: String, groupId: String?, accountName: String?, synchronizable: Bool?, accessibility: String?) -> OSStatus {
+    internal func write(key: String, value: String, groupId: String?, accountName: String?, synchronizable: Bool?, accessibility: String?, accessControl: String?) -> OSStatus {
         var attrAccessible: CFString = kSecAttrAccessibleWhenUnlocked
         if (accessibility != nil) {
             switch accessibility {
@@ -119,23 +123,47 @@ class FlutterSecureStorage{
                 attrAccessible = kSecAttrAccessibleWhenUnlocked
             }
         }
-        
-        let keyExists = containsKey(key: key, groupId: groupId, accountName: accountName, synchronizable: synchronizable)
-        var keychainQuery = baseQuery(key: key, groupId: groupId, accountName: accountName, synchronizable: synchronizable, returnData: nil)
-        if (keyExists) {
-            let update: [CFString: Any?] = [
-                kSecValueData: value.data(using: String.Encoding.utf8),
-                kSecAttrAccessible: attrAccessible,
-                kSecAttrSynchronizable: synchronizable
-            ]
-            
-            return SecItemUpdate(keychainQuery as CFDictionary, update as CFDictionary)
-        } else {
-            keychainQuery[kSecValueData] = value.data(using: String.Encoding.utf8)
-            keychainQuery[kSecAttrAccessible] = attrAccessible
-            
-            return SecItemAdd(keychainQuery as CFDictionary, nil)
+
+        let accessControlIsOn = accessControl != nil
+        var accessControlCreateWithFlags: SecAccessControl?
+        if let accessControl = accessControl {
+            var secAccessControlCreateFlags: SecAccessControlCreateFlags
+            if accessControl == "devicePasscode" {
+                secAccessControlCreateFlags = SecAccessControlCreateFlags.devicePasscode
+            } else if accessControl == "biometryAny" {
+                secAccessControlCreateFlags = SecAccessControlCreateFlags.biometryAny
+            }  else if accessControl == "biometryCurrentSet" {
+                secAccessControlCreateFlags = SecAccessControlCreateFlags.biometryCurrentSet
+            }  else if accessControl == "userPresence" {
+                secAccessControlCreateFlags = SecAccessControlCreateFlags.userPresence
+            }  else {
+                abort()
+            }
+
+            var error: Unmanaged<CFError>?
+            accessControlCreateWithFlags = SecAccessControlCreateWithFlags(kCFAllocatorDefault,
+                                                                           attrAccessible,
+                                                                           secAccessControlCreateFlags,
+                                                                           &error)
         }
+
+        // When calling "read", authentication is always performed, so remove it and proceed with the writing.
+        var keychainQuery = baseQuery(key: key, groupId: groupId, accountName: accountName, synchronizable: synchronizable, returnData: nil, accessControl: accessControlCreateWithFlags)
+
+        let err = delete(key: key, groupId: groupId, accountName: accountName, synchronizable: synchronizable)
+
+        let errType = OSStatusType(rawValue: err)
+
+        // The result of the deletion should be either "success" or "not found".
+        guard [.noError, .couldNotFound ].contains( errType ) else { return err }
+
+        keychainQuery[kSecValueData] = value.data(using: String.Encoding.utf8)
+
+        if !accessControlIsOn {
+            keychainQuery[kSecAttrAccessible] = attrAccessible
+        }
+
+        return SecItemAdd(keychainQuery as CFDictionary, nil)
     }
     
     struct FlutterSecureStorageResponse {

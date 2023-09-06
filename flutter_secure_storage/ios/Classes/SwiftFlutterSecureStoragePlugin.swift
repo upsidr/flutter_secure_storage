@@ -158,7 +158,7 @@ public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin {
         let accountName = options["accountName"] as? String
         let groupId = options["groupId"] as? String
         let synchronizableString = options["synchronizable"] as? String
-        
+        let accessControl = options["accessControlCreateFlags"] as? String
         
         let synchronizable: Bool = synchronizableString != nil ? Bool(synchronizableString!)! : false
         
@@ -179,6 +179,7 @@ public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin {
         var groupId: String?
         var synchronizable: Bool?
         var accessibility: String?
+        var accessControl: String?
         var key: String?
         var value: String?
     }
