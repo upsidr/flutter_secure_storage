@@ -29,10 +29,12 @@ abstract class AppleOptions extends Options {
     String? accountName = AppleOptions.defaultAccountName,
     KeychainAccessibility accessibility = KeychainAccessibility.unlocked,
     bool synchronizable = false,
+    IOSAccessControlCreateFlags? accessControlCreateFlags,
   })  : _groupId = groupId,
         _accessibility = accessibility,
         _accountName = accountName,
-        _synchronizable = synchronizable;
+        _synchronizable = synchronizable,
+        _accessControlCreateFlags = accessControlCreateFlags;
 
   static const defaultAccountName = 'flutter_secure_storage_service';
 
@@ -40,6 +42,7 @@ abstract class AppleOptions extends Options {
   final String? _accountName;
   final KeychainAccessibility _accessibility;
   final bool _synchronizable;
+  final IOSAccessControlCreateFlags? _accessControlCreateFlags;
 
   @override
   Map<String, String> toMap() => <String, String>{
@@ -47,5 +50,7 @@ abstract class AppleOptions extends Options {
         if (_accountName != null) 'accountName': _accountName!,
         if (_groupId != null) 'groupId': _groupId!,
         'synchronizable': '$_synchronizable',
+        if (_accessControlCreateFlags != null)
+          'accessControlCreateFlags': describeEnum(_accessControlCreateFlags!),
       };
 }
