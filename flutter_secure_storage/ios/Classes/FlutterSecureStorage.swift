@@ -47,7 +47,7 @@ class FlutterSecureStorage{
     }
     
     internal func readAll(groupId: String?, accountName: String?, synchronizable: Bool?) -> FlutterSecureStorageResponse {
-        var keychainQuery = baseQuery(key: nil, groupId: groupId, accountName: accountName, synchronizable: synchronizable, returnData: true)
+        var keychainQuery = baseQuery(key: nil, groupId: groupId, accountName: accountName, synchronizable: synchronizable, returnData: true, accessControl: accessControl)
         
         keychainQuery[kSecMatchLimit] = kSecMatchLimitAll
         keychainQuery[kSecReturnAttributes] = true
@@ -72,7 +72,7 @@ class FlutterSecureStorage{
     }
     
     internal func read(key: String, groupId: String?, accountName: String?, synchronizable: Bool?) -> FlutterSecureStorageResponse {
-        let keychainQuery = baseQuery(key: key, groupId: groupId, accountName: accountName, synchronizable: synchronizable, returnData: true)
+        let keychainQuery = baseQuery(key: key, groupId: groupId, accountName: accountName, synchronizable: synchronizable, returnData: true, accessControl: accessControl)
         
         var ref: AnyObject?
         let status = SecItemCopyMatching(
@@ -89,13 +89,13 @@ class FlutterSecureStorage{
     }
     
     internal func deleteAll(groupId: String?, accountName: String?, synchronizable: Bool?) -> OSStatus {
-        let keychainQuery = baseQuery(key: nil, groupId: groupId, accountName: accountName, synchronizable: synchronizable, returnData: nil)
+        let keychainQuery = baseQuery(key: nil, groupId: groupId, accountName: accountName, synchronizable: synchronizable, returnData: nil, accessControl: accessControl)
         
         return SecItemDelete(keychainQuery as CFDictionary)
     }
     
     internal func delete(key: String, groupId: String?, accountName: String?, synchronizable: Bool?) -> OSStatus {
-        let keychainQuery = baseQuery(key: key, groupId: groupId, accountName: accountName, synchronizable: synchronizable, returnData: true)
+        let keychainQuery = baseQuery(key: key, groupId: groupId, accountName: accountName, synchronizable: synchronizable, returnData: true, accessControl: accessControl)
         
         return SecItemDelete(keychainQuery as CFDictionary)
     }
