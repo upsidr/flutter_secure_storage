@@ -30,7 +30,7 @@ public class FlutterSecureStorage {
     protected String ELEMENT_PREFERENCES_KEY_PREFIX = "VGhpcyBpcyB0aGUgcHJlZml4IGZvciBhIHNlY3VyZSBzdG9yYWdlCg";
     protected Map<String, Object> options;
     private String SHARED_PREFERENCES_NAME = "FlutterSecureStorage";
-    private String masterKeyAlias = "MasterKey.DEFAULT_MASTER_KEY_ALIAS";
+    private String masterKeyAlias = MasterKey.DEFAULT_MASTER_KEY_ALIAS;
     private SharedPreferences preferences;
     private StorageCipher storageCipher;
     private StorageCipherFactory storageCipherFactory;
@@ -70,7 +70,7 @@ public class FlutterSecureStorage {
         return options.containsKey("useBiometric") && options.get("useBiometric").equals("true");
     }
 
-    boolean containsKey(String key) {
+    boolean containsKey(String key) throws Exception {
         ensureInitialized();
         return preferences.contains(key);
     }
@@ -123,7 +123,7 @@ public class FlutterSecureStorage {
         editor.apply();
     }
 
-    public void delete(String key) {
+    public void delete(String key) throws Exception {
         ensureInitialized();
 
         SharedPreferences.Editor editor = preferences.edit();
@@ -131,7 +131,7 @@ public class FlutterSecureStorage {
         editor.apply();
     }
 
-    void deleteAll() {
+    void deleteAll() throws Exception {
         ensureInitialized();
 
         final SharedPreferences.Editor editor = preferences.edit();
@@ -143,9 +143,9 @@ public class FlutterSecureStorage {
     }
 
     @SuppressWarnings({ "ConstantConditions" })
-    private void ensureInitialized() {
+    private void ensureInitialized () throws Exception {
         // Check if already initialized.
-        // TODO: Disable for now because this will break mixed usage of secureSharedPreference
+        // TODO: Disable for now because this will break mixed usage ofsecureSharedPreference
         // if (preferences != null) return;
 
         if (options.containsKey("sharedPreferencesName")
@@ -169,7 +169,12 @@ public class FlutterSecureStorage {
             }
         }
         if (getUseEncryptedSharedPreferences() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            try {
+            /*
+            * The original uses EncryptedSharedPreferences to catch errors and use nonEncryptedPreferences.
+            * Exclude this process because you want to receive it as an error
+            * */
+
+            // try {
 
                 Object authDurationObject = options.get("authenticationValidityDurationSeconds");
                 if (authDurationObject == null || !(authDurationObject instanceof String)) {
@@ -185,11 +190,12 @@ public class FlutterSecureStorage {
                 }
 
                 checkAndMigrateToEncrypted(nonEncryptedPreferences, preferences);
-            } catch (Exception e) {
-                Log.e(TAG, "EncryptedSharedPreferences initialization failed", e);
-                preferences = nonEncryptedPreferences;
-                failedToUseEncryptedSharedPreferences = true;
-            }
+
+            //  } catch (Exception e) {
+            //     Log.e(TAG, "EncryptedSharedPreferences initialization failed", e);
+            //     preferences = nonEncryptedPreferences;
+            //     failedToUseEncryptedSharedPreferences = true;
+            //  }
         } else {
             preferences = nonEncryptedPreferences;
         }
