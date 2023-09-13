@@ -24,7 +24,7 @@ enum _ItemActions { delete, edit, containsKey, read }
 const _sharedPreferencesName = 'FlutterSecureStorage';
 const _biometricSharedPreferencesName = 'FlutterBiometricSecureStorage';
 const _masterKeyAlias = '_androidx_security_master_key_';
-// const _biometricMasterKeyAlias = '_androidx_security_master_key_biometric_';
+const _biometricMasterKeyAlias = '_androidx_security_master_key_biometric_';
 
 class ItemsWidgetState extends State<ItemsWidget> {
   final _storage = const FlutterSecureStorage();
@@ -87,9 +87,8 @@ class ItemsWidgetState extends State<ItemsWidget> {
             ? _biometricSharedPreferencesName
             : _sharedPreferencesName,
         encryptedSharedPreferences: true,
-        // masterKeyAlias:
-        //     useBiometric ? _biometricMasterKeyAlias : _masterKeyAlias,
-        masterKeyAlias: _masterKeyAlias,
+        masterKeyAlias:
+            useBiometric ? _biometricMasterKeyAlias : _masterKeyAlias,
         useBiometric: useBiometric,
         authenticationValidityDurationSeconds: 20,
       );

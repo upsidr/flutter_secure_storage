@@ -30,7 +30,7 @@ public class FlutterSecureStorage {
     protected String ELEMENT_PREFERENCES_KEY_PREFIX = "VGhpcyBpcyB0aGUgcHJlZml4IGZvciBhIHNlY3VyZSBzdG9yYWdlCg";
     protected Map<String, Object> options;
     private String SHARED_PREFERENCES_NAME = "FlutterSecureStorage";
-    private String masterKeyAlias = MasterKey.DEFAULT_MASTER_KEY_ALIAS;
+    private String masterKeyAlias = "test"; //MasterKey.DEFAULT_MASTER_KEY_ALIAS;
     private SharedPreferences preferences;
     private StorageCipher storageCipher;
     private StorageCipherFactory storageCipherFactory;
@@ -268,7 +268,7 @@ public class FlutterSecureStorage {
             throws GeneralSecurityException, IOException {
         MasterKey key = new MasterKey.Builder(context, masterKeyAlias)
                 .setKeyGenParameterSpec(
-                        new KeyGenParameterSpec.Builder(MasterKey.DEFAULT_MASTER_KEY_ALIAS,
+                        new KeyGenParameterSpec.Builder(masterKeyAlias,
                                 KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
                                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                                 .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
@@ -287,7 +287,7 @@ public class FlutterSecureStorage {
             int authenticationValidityDurationSeconds) throws GeneralSecurityException, IOException {
         MasterKey key = new MasterKey.Builder(context, masterKeyAlias)
                 .setKeyGenParameterSpec(
-                        new KeyGenParameterSpec.Builder(MasterKey.DEFAULT_MASTER_KEY_ALIAS,
+                        new KeyGenParameterSpec.Builder(masterKeyAlias,
                                 KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
                                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                                 .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
