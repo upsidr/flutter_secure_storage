@@ -56,10 +56,10 @@ public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin {
       
         if let oSStatus = response.status {
             let error = SecureStorageError.fromOSStatus(key: values.key, oSStatus: oSStatus)
-            if error == nil {
-                result(response.value)
+            if let error = error {
+                result(FlutterError(code: error.code.description, message: error.localizedDescription, details: nil))
             } else {
-                result(error)
+                result(response.value)
             }
         } else {
             result(response.value)
@@ -85,10 +85,12 @@ public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin {
         
         let response = flutterSecureStorageManager.write(key: values.key!, value: values.value!, groupId: values.groupId, accountName: values.accountName, synchronizable: values.synchronizable, accessibility: values.accessibility, accessControl: values.accessControl)
         let error = SecureStorageError.fromOSStatus(key: values.key, oSStatus: response)
-        if error == nil {
-            result(response)
+
+
+        if let error = error {
+            result(FlutterError(code: error.code.description, message: error.localizedDescription, details: nil))
         } else {
-            result(error)
+            result(response)
         }
     }
     
@@ -102,10 +104,11 @@ public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin {
         let response = flutterSecureStorageManager.delete(key: values.key!, groupId: values.groupId, accountName: values.accountName, synchronizable: values.synchronizable)
         
         let error = SecureStorageError.fromOSStatus(key: values.key, oSStatus: response)
-        if error == nil {
-            result(response)
+
+        if let error = error {
+            result(FlutterError(code: error.code.description, message: error.localizedDescription, details: nil))
         } else {
-            result(error)
+            result(response)
         }
     }
     
@@ -114,11 +117,11 @@ public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin {
         
         let response = flutterSecureStorageManager.deleteAll(groupId: values.groupId, accountName: values.accountName, synchronizable: values.synchronizable)
         let error = SecureStorageError.fromOSStatus(key: values.key, oSStatus: response)
-       
-        if error == nil {
-            result(response)
+
+        if let error = error {
+            result(FlutterError(code: error.code.description, message: error.localizedDescription, details: nil))
         } else {
-//            result(error) // TODO: Respond to "could not found" errors
+            result(response)
         }
     }
     
@@ -129,10 +132,11 @@ public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin {
        
         if let oSStatus = response.status {
             let error = SecureStorageError.fromOSStatus(key: values.key, oSStatus: oSStatus)
-            if error == nil {
-                result(response.value)
+
+            if let error = error {
+                result(FlutterError(code: error.code.description, message: error.localizedDescription, details: nil))
             } else {
-//                result(error) // TODO: Respond to "could not found" errors
+                result(response.value)
             }
         } else {
             result(response.value)
