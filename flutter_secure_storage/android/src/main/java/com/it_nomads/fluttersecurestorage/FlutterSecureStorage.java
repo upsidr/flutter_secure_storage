@@ -30,6 +30,7 @@ public class FlutterSecureStorage {
     protected String ELEMENT_PREFERENCES_KEY_PREFIX = "VGhpcyBpcyB0aGUgcHJlZml4IGZvciBhIHNlY3VyZSBzdG9yYWdlCg";
     protected Map<String, Object> options;
     private String SHARED_PREFERENCES_NAME = "FlutterSecureStorage";
+    private String masterKeyAlias = "MasterKey.DEFAULT_MASTER_KEY_ALIAS";
     private SharedPreferences preferences;
     private StorageCipher storageCipher;
     private StorageCipherFactory storageCipherFactory;
@@ -41,22 +42,32 @@ public class FlutterSecureStorage {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             charset = StandardCharsets.UTF_8;
         } else {
-            //noinspection CharsetObjectCanBeUsed
+            // noinspection CharsetObjectCanBeUsed
             charset = Charset.forName("UTF-8");
         }
     }
 
-    @SuppressWarnings({"ConstantConditions"})
+    @SuppressWarnings({ "ConstantConditions" })
     boolean getResetOnError() {
         return options.containsKey("resetOnError") && options.get("resetOnError").equals("true");
     }
 
-    @SuppressWarnings({"ConstantConditions"})
+    @SuppressWarnings({ "ConstantConditions" })
     private boolean getUseEncryptedSharedPreferences() {
         if (failedToUseEncryptedSharedPreferences) {
             return false;
         }
-        return options.containsKey("encryptedSharedPreferences") && options.get("encryptedSharedPreferences").equals("true") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
+        return options.containsKey("encryptedSharedPreferences")
+                && options.get("encryptedSharedPreferences").equals("true")
+                && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
+    }
+
+    @SuppressWarnings({ "ConstantConditions" })
+    private boolean getUseBiometric() {
+        if (options == null) {
+            return false;
+        }
+        return options.containsKey("useBiometric") && options.get("useBiometric").equals("true");
     }
 
     boolean containsKey(String key) {
@@ -131,13 +142,14 @@ public class FlutterSecureStorage {
         editor.apply();
     }
 
-    @SuppressWarnings({"ConstantConditions"})
+    @SuppressWarnings({ "ConstantConditions" })
     private void ensureInitialized() {
         // Check if already initialized.
         // TODO: Disable for now because this will break mixed usage of secureSharedPreference
-//        if (preferences != null) return;
+        // if (preferences != null) return;
 
-        if (options.containsKey("sharedPreferencesName") && !((String) options.get("sharedPreferencesName")).isEmpty()) {
+        if (options.containsKey("sharedPreferencesName")
+                && !((String) options.get("sharedPreferencesName")).isEmpty()) {
             SHARED_PREFERENCES_NAME = (String) options.get("sharedPreferencesName");
         }
 
@@ -147,8 +159,7 @@ public class FlutterSecureStorage {
 
         SharedPreferences nonEncryptedPreferences = applicationContext.getSharedPreferences(
                 SHARED_PREFERENCES_NAME,
-                Context.MODE_PRIVATE
-        );
+                Context.MODE_PRIVATE);
         if (storageCipher == null) {
             try {
                 initStorageCipher(nonEncryptedPreferences);
@@ -159,7 +170,20 @@ public class FlutterSecureStorage {
         }
         if (getUseEncryptedSharedPreferences() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             try {
-                preferences = initializeEncryptedSharedPreferencesManager(applicationContext);
+
+                Object authDurationObject = options.get("authenticationValidityDurationSeconds");
+                if (authDurationObject == null || !(authDurationObject instanceof String)) {
+                    throw new IllegalArgumentException("no authenticationValidityDurationSeconds");
+                }
+                int authenticationValidityDurationSeconds = Integer.parseInt((String) authDurationObject);
+
+                if (getUseBiometric()) {
+                    preferences = initializeEncryptedSharedPreferencesManagerAuthenticationRequired(applicationContext,
+                            authenticationValidityDurationSeconds);
+                } else {
+                    preferences = initializeEncryptedSharedPreferencesManager(applicationContext);
+                }
+
                 checkAndMigrateToEncrypted(nonEncryptedPreferences, preferences);
             } catch (Exception e) {
                 Log.e(TAG, "EncryptedSharedPreferences initialization failed", e);
@@ -182,7 +206,8 @@ public class FlutterSecureStorage {
         }
     }
 
-    private void reEncryptPreferences(StorageCipherFactory storageCipherFactory, SharedPreferences source) throws Exception {
+    private void reEncryptPreferences(StorageCipherFactory storageCipherFactory, SharedPreferences source)
+            throws Exception {
         try {
             storageCipher = storageCipherFactory.getSavedStorageCipher(applicationContext);
             final Map<String, String> cache = new HashMap<>();
@@ -228,11 +253,12 @@ public class FlutterSecureStorage {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
-    private SharedPreferences initializeEncryptedSharedPreferencesManager(Context context) throws GeneralSecurityException, IOException {
-        MasterKey key = new MasterKey.Builder(context)
+    private SharedPreferences initializeEncryptedSharedPreferencesManager(Context context)
+            throws GeneralSecurityException, IOException {
+        MasterKey key = new MasterKey.Builder(context, masterKeyAlias)
                 .setKeyGenParameterSpec(
-                        new KeyGenParameterSpec
-                                .Builder(MasterKey.DEFAULT_MASTER_KEY_ALIAS, KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                        new KeyGenParameterSpec.Builder(MasterKey.DEFAULT_MASTER_KEY_ALIAS,
+                                KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
                                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                                 .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                                 .setKeySize(256).build())
@@ -242,8 +268,36 @@ public class FlutterSecureStorage {
                 SHARED_PREFERENCES_NAME,
                 key,
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        );
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    private SharedPreferences initializeEncryptedSharedPreferencesManagerAuthenticationRequired(Context context,
+            int authenticationValidityDurationSeconds) throws GeneralSecurityException, IOException {
+        MasterKey key = new MasterKey.Builder(context, masterKeyAlias)
+                .setKeyGenParameterSpec(
+                        new KeyGenParameterSpec.Builder(MasterKey.DEFAULT_MASTER_KEY_ALIAS,
+                                KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                                .setKeySize(256)
+                                .setUserAuthenticationRequired(true)
+                                .setUserAuthenticationValidityDurationSeconds(
+                                    authenticationValidityDurationSeconds
+                                )
+                                // .setUserAuthenticationParameters(
+                                // authenticationValidityDurationSeconds,
+                                // KeyProperties.AUTH_BIOMETRIC_STRONG
+                                // )
+                                .setInvalidatedByBiometricEnrollment(true)
+                                .build())
+                .build();
+        return EncryptedSharedPreferences.create(
+                context,
+                SHARED_PREFERENCES_NAME,
+                key,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM);
     }
 
     private String decodeRawValue(String value) throws Exception {

@@ -18,15 +18,24 @@ class AndroidOptions extends Options {
         KeyCipherAlgorithm.RSA_ECB_PKCS1Padding,
     StorageCipherAlgorithm storageCipherAlgorithm =
         StorageCipherAlgorithm.AES_CBC_PKCS7Padding,
+    bool useBiometric = false,
+    int authenticationValidityDurationSeconds = 600,
     this.sharedPreferencesName,
     this.preferencesKeyPrefix,
-  })  : _encryptedSharedPreferences = encryptedSharedPreferences,
+    required String masterKeyAlias,
+  })  : _masterKeyAlias = masterKeyAlias,
+        _encryptedSharedPreferences = encryptedSharedPreferences,
         _resetOnError = resetOnError,
         _keyCipherAlgorithm = keyCipherAlgorithm,
-        _storageCipherAlgorithm = storageCipherAlgorithm;
+        _storageCipherAlgorithm = storageCipherAlgorithm,
+        _useBiometric = useBiometric,
+        _authenticationValidityDurationSeconds =
+            authenticationValidityDurationSeconds;
 
   /// EncryptedSharedPrefences are only available on API 23 and greater
   final bool _encryptedSharedPreferences;
+
+  final String _masterKeyAlias;
 
   /// When an error is detected, automatically reset all data. This will prevent
   /// fatal errors regarding an unknown key however keep in mind that it will
@@ -34,6 +43,10 @@ class AndroidOptions extends Options {
   ///
   /// Defaults to false.
   final bool _resetOnError;
+
+  final bool _useBiometric;
+
+  final int _authenticationValidityDurationSeconds;
 
   /// If EncryptedSharedPrefences is set to false, you can select algorithm
   /// that will be used to encrypt secret key.
@@ -63,7 +76,8 @@ class AndroidOptions extends Options {
   /// WARNING: If you change this you can't retrieve already saved preferences.
   final String? preferencesKeyPrefix;
 
-  static const AndroidOptions defaultOptions = AndroidOptions();
+  static const AndroidOptions defaultOptions =
+      AndroidOptions(masterKeyAlias: 'flutter_secure_storage');
 
   @override
   Map<String, String> toMap() => <String, String>{
@@ -73,6 +87,10 @@ class AndroidOptions extends Options {
         'storageCipherAlgorithm': describeEnum(_storageCipherAlgorithm),
         'sharedPreferencesName': sharedPreferencesName ?? '',
         'preferencesKeyPrefix': preferencesKeyPrefix ?? '',
+        'masterKeyAlias': _masterKeyAlias ?? '',
+        'useBiometric': '$_useBiometric',
+        'authenticationValidityDurationSeconds':
+            '$_authenticationValidityDurationSeconds',
       };
 
   AndroidOptions copyWith({
@@ -82,15 +100,23 @@ class AndroidOptions extends Options {
     StorageCipherAlgorithm? storageCipherAlgorithm,
     String? preferencesKeyPrefix,
     String? sharedPreferencesName,
+    String? masterKeyAlias,
+    bool? useBiometric,
+    int? authenticationValidityDurationSeconds,
   }) =>
       AndroidOptions(
         encryptedSharedPreferences:
             encryptedSharedPreferences ?? _encryptedSharedPreferences,
         resetOnError: resetOnError ?? _resetOnError,
+        authenticationValidityDurationSeconds:
+            authenticationValidityDurationSeconds ??
+                _authenticationValidityDurationSeconds,
         keyCipherAlgorithm: keyCipherAlgorithm ?? _keyCipherAlgorithm,
         storageCipherAlgorithm:
             storageCipherAlgorithm ?? _storageCipherAlgorithm,
         sharedPreferencesName: sharedPreferencesName,
+        masterKeyAlias: masterKeyAlias ?? _masterKeyAlias,
+        useBiometric: useBiometric ?? _useBiometric,
         preferencesKeyPrefix: preferencesKeyPrefix,
       );
 }

@@ -21,6 +21,11 @@ enum _Actions { deleteAll }
 
 enum _ItemActions { delete, edit, containsKey, read }
 
+const _sharedPreferencesName = 'FlutterSecureStorage';
+const _biometricSharedPreferencesName = 'FlutterBiometricSecureStorage';
+const _masterKeyAlias = '_androidx_security_master_key_';
+const _biometricMasterKeyAlias = '_androidx_security_master_key_biometric_';
+
 class ItemsWidgetState extends State<ItemsWidget> {
   final _storage = const FlutterSecureStorage();
   final _accountNameController =
@@ -39,7 +44,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
   Future<void> _readAll() async {
     final all = await _storage.readAll(
       iOptions: _getIOSOptions(),
-      aOptions: _getAndroidOptions(),
+      aOptions: _getAndroidOptions(useBiometric: true),
     );
     setState(() {
       _items = all.entries
@@ -51,7 +56,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
   Future<void> _deleteAll() async {
     await _storage.deleteAll(
       iOptions: _getIOSOptions(),
-      aOptions: _getAndroidOptions(),
+      aOptions: _getAndroidOptions(useBiometric: true),
     );
     _readAll();
   }
@@ -59,24 +64,33 @@ class ItemsWidgetState extends State<ItemsWidget> {
   Future<void> _addNewItem() async {
     final String key = _randomValue();
     final String value = _randomValue();
-
-    await _storage.write(
+    print("_addNewItem");
+    await FlutterSecureStorage(
+      iOptions: _getIOSOptions(),
+      aOptions: _getAndroidOptions(useBiometric: true),
+    ).write(
       key: key,
       value: value,
-      iOptions: _getIOSOptions(),
-      aOptions: _getAndroidOptions(),
     );
     _readAll();
   }
 
-  IOSOptions _getIOSOptions() => IOSOptions(
-        accountName: _getAccountName(),
+  IOSOptions _getIOSOptions() => const IOSOptions(
+        accessibility: KeychainAccessibility.passcode,
+        accessControlCreateFlags:
+            IOSAccessControlCreateFlags.biometryCurrentSet,
       );
 
-  AndroidOptions _getAndroidOptions() => const AndroidOptions(
+  AndroidOptions _getAndroidOptions({required bool useBiometric}) =>
+      AndroidOptions(
+        sharedPreferencesName: useBiometric
+            ? _biometricSharedPreferencesName
+            : _sharedPreferencesName,
         encryptedSharedPreferences: true,
-        // sharedPreferencesName: 'Test2',
-        // preferencesKeyPrefix: 'Test'
+        masterKeyAlias:
+            useBiometric ? _biometricMasterKeyAlias : _masterKeyAlias,
+        useBiometric: useBiometric,
+        authenticationValidityDurationSeconds: 1,
       );
 
   String? _getAccountName() =>
@@ -113,6 +127,44 @@ class ItemsWidgetState extends State<ItemsWidget> {
         ),
         body: Column(
           children: [
+            Column(
+              children: [
+                TextButton(
+                  child: Text("write"),
+                  onPressed: () {
+                    print("write");
+                    _storage.write(
+                      key: "Test",
+                      value: "VALVALVALVALVALVALVALVALVALVALVAL",
+                      iOptions: _getIOSOptions(),
+                      aOptions: _getAndroidOptions(useBiometric: true),
+                    );
+                  },
+                ),
+                TextButton(
+                  child: Text("read"),
+                  onPressed: () async {
+                    print("Read");
+                    final v = await _storage.read(
+                      key: "Test",
+                      iOptions: _getIOSOptions(),
+                      aOptions: _getAndroidOptions(useBiometric: true),
+                    );
+                    print(v);
+                  },
+                ),
+                TextButton(
+                  child: Text("Delete"),
+                  onPressed: () async {
+                    await _storage.delete(
+                      key: "Test",
+                      iOptions: _getIOSOptions(),
+                      aOptions: _getAndroidOptions(useBiometric: true),
+                    );
+                  },
+                ),
+              ],
+            ),
             if (!kIsWeb && Platform.isIOS)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -187,7 +239,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
         await _storage.delete(
           key: item.key,
           iOptions: _getIOSOptions(),
-          aOptions: _getAndroidOptions(),
+          aOptions: _getAndroidOptions(useBiometric: true),
         );
         _readAll();
 
@@ -203,7 +255,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
             key: item.key,
             value: result,
             iOptions: _getIOSOptions(),
-            aOptions: _getAndroidOptions(),
+            aOptions: _getAndroidOptions(useBiometric: true),
           );
           _readAll();
         }
@@ -223,8 +275,14 @@ class ItemsWidgetState extends State<ItemsWidget> {
       case _ItemActions.read:
         if (!context.mounted) return;
         final key = await _displayTextInputDialog(context, item.key);
-        final result =
-            await _storage.read(key: key, aOptions: _getAndroidOptions());
+        final result = await _storage.read(
+          key: key,
+          iOptions: const IOSOptions(
+            accessibility: KeychainAccessibility.passcode,
+            accessControlCreateFlags: null,
+          ),
+          aOptions: _getAndroidOptions(useBiometric: true),
+        );
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

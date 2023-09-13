@@ -118,7 +118,7 @@ public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin {
         if error == nil {
             result(response)
         } else {
-            result(error)
+//            result(error) // TODO: Respond to "could not found" errors
         }
     }
     
@@ -132,7 +132,7 @@ public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin {
             if error == nil {
                 result(response.value)
             } else {
-                result(error)
+//                result(error) // TODO: Respond to "could not found" errors
             }
         } else {
             result(response.value)
@@ -169,7 +169,9 @@ public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin {
             accountName: accountName,
             groupId: groupId,
             synchronizable: synchronizable,
-            accessibility: accessibility, key: key, value: value
+            accessibility: accessibility,
+            accessControl: accessControl,
+            key: key, value: value
         )
     }
     
