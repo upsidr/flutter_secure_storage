@@ -197,10 +197,20 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
             }
         }
 
-        private void handleException(Exception e) {
+        private void handleException(Throwable throwable) {
+            // Extract the cause since UserNotAuthenticatedException is wrapped in KeyStoreException.
+            Throwable cause = throwable.getCause() != null ? throwable.getCause() : throwable;
+            String className = cause.getClass().getSimpleName();
+            if (className == null || className.isEmpty()) {
+                className = "AndroidNativeException";
+            }
+
             StringWriter stringWriter = new StringWriter();
-            e.printStackTrace(new PrintWriter(stringWriter));
-            result.error("Exception encountered", call.method, stringWriter.toString());
+            cause.printStackTrace(new PrintWriter(stringWriter));
+            String stackTraceString = stringWriter.toString();
+
+            // Classify className for error handling
+            result.error(className, cause.getMessage(), stackTraceString);
         }
     }
 }
