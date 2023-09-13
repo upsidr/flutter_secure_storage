@@ -24,7 +24,7 @@ enum _ItemActions { delete, edit, containsKey, read }
 const _sharedPreferencesName = 'FlutterSecureStorage';
 const _biometricSharedPreferencesName = 'FlutterBiometricSecureStorage';
 const _masterKeyAlias = '_androidx_security_master_key_';
-const _biometricMasterKeyAlias = '_androidx_security_master_key_biometric_';
+// const _biometricMasterKeyAlias = '_androidx_security_master_key_biometric_';
 
 class ItemsWidgetState extends State<ItemsWidget> {
   final _storage = const FlutterSecureStorage();
@@ -87,10 +87,11 @@ class ItemsWidgetState extends State<ItemsWidget> {
             ? _biometricSharedPreferencesName
             : _sharedPreferencesName,
         encryptedSharedPreferences: true,
-        masterKeyAlias:
-            useBiometric ? _biometricMasterKeyAlias : _masterKeyAlias,
+        // masterKeyAlias:
+        //     useBiometric ? _biometricMasterKeyAlias : _masterKeyAlias,
+        masterKeyAlias: _masterKeyAlias,
         useBiometric: useBiometric,
-        authenticationValidityDurationSeconds: 1,
+        authenticationValidityDurationSeconds: 20,
       );
 
   String? _getAccountName() =>
@@ -130,23 +131,21 @@ class ItemsWidgetState extends State<ItemsWidget> {
             Column(
               children: [
                 TextButton(
-                  child: Text("write"),
+                  child: const Text("Write"),
                   onPressed: () {
-                    print("write");
                     _storage.write(
-                      key: "Test",
-                      value: "VALVALVALVALVALVALVALVALVALVALVAL",
+                      key: "TEST_KEY",
+                      value: "TEST_VALUE",
                       iOptions: _getIOSOptions(),
                       aOptions: _getAndroidOptions(useBiometric: true),
                     );
                   },
                 ),
                 TextButton(
-                  child: Text("read"),
+                  child: const Text("Read"),
                   onPressed: () async {
-                    print("Read");
                     final v = await _storage.read(
-                      key: "Test",
+                      key: "TEST_KEY",
                       iOptions: _getIOSOptions(),
                       aOptions: _getAndroidOptions(useBiometric: true),
                     );
@@ -154,10 +153,10 @@ class ItemsWidgetState extends State<ItemsWidget> {
                   },
                 ),
                 TextButton(
-                  child: Text("Delete"),
+                  child: const Text("Delete"),
                   onPressed: () async {
                     await _storage.delete(
-                      key: "Test",
+                      key: "TEST_KEY",
                       iOptions: _getIOSOptions(),
                       aOptions: _getAndroidOptions(useBiometric: true),
                     );

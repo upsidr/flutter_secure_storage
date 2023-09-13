@@ -153,6 +153,11 @@ public class FlutterSecureStorage {
             SHARED_PREFERENCES_NAME = (String) options.get("sharedPreferencesName");
         }
 
+        if (options.containsKey("masterKeyAlias")
+                && !((String) options.get("masterKeyAlias")).isEmpty()) {
+            masterKeyAlias = (String) options.get("masterKeyAlias");
+        }
+
         if (options.containsKey("preferencesKeyPrefix") && !((String) options.get("preferencesKeyPrefix")).isEmpty()) {
             ELEMENT_PREFERENCES_KEY_PREFIX = (String) options.get("preferencesKeyPrefix");
         }
