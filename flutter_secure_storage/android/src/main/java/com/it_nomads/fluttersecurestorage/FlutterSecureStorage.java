@@ -30,7 +30,7 @@ public class FlutterSecureStorage {
     protected String ELEMENT_PREFERENCES_KEY_PREFIX = "VGhpcyBpcyB0aGUgcHJlZml4IGZvciBhIHNlY3VyZSBzdG9yYWdlCg";
     protected Map<String, Object> options;
     private String SHARED_PREFERENCES_NAME = "FlutterSecureStorage";
-    private String masterKeyAlias = "test"; //MasterKey.DEFAULT_MASTER_KEY_ALIAS;
+    private String masterKeyAlias = MasterKey.DEFAULT_MASTER_KEY_ALIAS;
     private SharedPreferences preferences;
     private StorageCipher storageCipher;
     private StorageCipherFactory storageCipherFactory;
