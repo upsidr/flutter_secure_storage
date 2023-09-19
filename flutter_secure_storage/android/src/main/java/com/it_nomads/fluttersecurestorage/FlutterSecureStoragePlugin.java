@@ -139,7 +139,7 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
                             secureStorage.write(key, value);
                             result.success(null);
                         } else {
-                            result.error("null", null, null);
+                            result.error("ValueIsNull", null, null);
                         }
                         break;
                     }
@@ -181,16 +181,10 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
                         result.notImplemented();
                         break;
                 }
-            } catch (FileNotFoundException e) {
-                Log.i("Creating sharedPrefs", e.getLocalizedMessage());
             } catch (Exception e) {
-                if (resetOnError) {
-                    try {
-                        secureStorage.deleteAll();
-                        result.success("Data has been reset");
-                    } catch (Exception ex) {
-                        handleException(ex);
-                    }
+               if (!(e instanceof FileNotFoundException) && resetOnError) {
+                    secureStorage.deleteAll();
+                    result.success("Data has been reset");
                 } else {
                     handleException(e);
                 }
