@@ -6,6 +6,8 @@ enum OSStatusType: Int32 {
     case couldNotFound = -25300
     case attributedoesnotexist = -25303
     case requiredentitlementnotpresent = -34018
+    case errSecInteractionNotAllowed = -25308
+    case errSecUserCanceled = -128
 
     var message: String {
         switch self {
@@ -23,6 +25,10 @@ enum OSStatusType: Int32 {
             return "The specified attribute does not exist."
         case .requiredentitlementnotpresent:
             return "A required entitlement isn’t present."
+        case .errSecInteractionNotAllowed:
+            return "Interaction with the Security Server is not allowed."
+        case .errSecUserCanceled:
+            return "User canceled the operation."
         }
     }
 }

@@ -8,6 +8,8 @@ enum SecureStorageError: Error, LocalizedError {
     case parseFailed
     case unknownOSStatus(String, String)
     case unknownAccessControl(String)
+    case interactionNotAllowed
+    case userCanceled
     case other
 
     static func fromOSStatus( key: String?, oSStatus: OSStatus ) -> SecureStorageError? {
@@ -31,6 +33,10 @@ enum SecureStorageError: Error, LocalizedError {
             return .other
         case .requiredentitlementnotpresent:
             return .other
+        case .errSecInteractionNotAllowed:
+            return .other
+        case .errSecUserCanceled:
+            return .userCanceled
         }
     }
 
@@ -43,7 +49,10 @@ enum SecureStorageError: Error, LocalizedError {
         case .parseFailed: return -5
         case .unknownOSStatus( _,  _): return -6
         case .unknownAccessControl( _): return -7
+        case .interactionNotAllowed: return -8
+        case .userCanceled: return -9
         case .other: return -1000
+            
         }
     }
 
@@ -63,6 +72,10 @@ enum SecureStorageError: Error, LocalizedError {
             return "unknown OSStatus: \(value), \(status)"
         case .unknownAccessControl(let accessControl):
             return "unknown AccessControl: \(accessControl)"
+        case .interactionNotAllowed:
+            return "The interaction is not allowed"
+        case .userCanceled:
+            return "User canceled the operation."
         case .other:
             return "other error."
         }
