@@ -183,8 +183,12 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
                 }
             } catch (Exception e) {
                if (!(e instanceof FileNotFoundException) && resetOnError) {
-                    secureStorage.deleteAll();
-                    result.success("Data has been reset");
+                   try {
+                       secureStorage.deleteAll();
+                       result.success("Data has been reset");
+                   } catch (Exception ex) {
+                       handleException(ex);
+                   }
                 } else {
                     handleException(e);
                 }
