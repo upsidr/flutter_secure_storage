@@ -75,7 +75,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
   Future<void> _addNewItem() async {
     final String key = _randomValue();
     final String value = _randomValue();
-    print("_addNewItem");
+    // print("_addNewItem");
     await FlutterSecureStorage(
       iOptions: _getIOSOptions(),
       aOptions: _getAndroidOptions(useBiometric: true),
@@ -104,8 +104,8 @@ class ItemsWidgetState extends State<ItemsWidget> {
         authenticationValidityDurationSeconds: 20,
       );
 
-  String? _getAccountName() =>
-      _accountNameController.text.isEmpty ? null : _accountNameController.text;
+  // String? _getAccountName() =>
+  //     _accountNameController.text.isEmpty ? null : _accountNameController.text;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -167,7 +167,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
                       iOptions: _getIOSOptions(),
                       aOptions: _getAndroidOptions(useBiometric: true),
                     );
-                    print(v);
+                    // print(v);
                   },
                 ),
                 TextButton(
@@ -294,7 +294,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
           key: key,
           iOptions: const IOSOptions(
             accessibility: KeychainAccessibility.passcode,
-            accessControlCreateFlags: null,
+            // accessControlCreateFlags: null,
           ),
           aOptions: _getAndroidOptions(useBiometric: true),
         );
