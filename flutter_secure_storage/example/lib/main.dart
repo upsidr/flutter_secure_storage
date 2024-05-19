@@ -87,7 +87,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
   }
 
   IOSOptions _getIOSOptions() => const IOSOptions(
-        // accessibility: KeychainAccessibility.passcode,
+        accessibility: KeychainAccessibility.passcode,
         accessControlCreateFlags:
             IOSAccessControlCreateFlags.biometryCurrentSet,
       );
