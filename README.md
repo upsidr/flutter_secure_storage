@@ -1,19 +1,4 @@
 # flutter_secure_storage
-
-### Breaking change for v5.1.0
-IOSAccessibility has been renamed to KeychainAccessibility. This however hasn't been properly documented in the changelog.
-
-### Important notice for Android and v5.0.0
-When upgrading from 4.2.1 to 5.0.0 you can migrate to EncryptedSharedPreferences by
-setting the encryptedSharedPreference parameter to true as explained below. This will automatically
-migrate all preferences. This however can't be undone. If you try to disable encryptedSharedPreference
-after this, you won't be able to read the values. You can only read those with encryptedSharedPreference
-enabled.
-
-### Important notice for Web
-flutter_secure_storage only works on HTTPS or localhost environments. [Please see this issue for more information.](https://github.com/mogol/flutter_secure_storage/issues/320#issuecomment-976308930)
-
-
 A Flutter plugin to store data in secure storage:
 
 - [Keychain](https://developer.apple.com/library/content/documentation/Security/Conceptual/keychainServConcepts/01introduction/introduction.html#//apple_ref/doc/uid/TP30000897-CH203-TP1) is used for iOS
@@ -40,18 +25,28 @@ For more information see the example app.
 - [`libsecret`](https://wiki.gnome.org/Projects/Libsecret) is used for Linux.
 
 _Note_ KeyStore was introduced in Android 4.3 (API level 18). The plugin wouldn't work for earlier versions.
+## Important notice for Web
+flutter_secure_storage only works on HTTPS or localhost environments. [Please see this issue for more information.](https://github.com/mogol/flutter_secure_storage/issues/320#issuecomment-976308930)
+
+### WASM support
+You can opt-in into the new WASM compatible version of flutter_secure_storage_web by adding the following override in your pubspec.yaml:
+
+```yaml
+dependency_overrides:
+  flutter_secure_storage_web: ^2.0.0-beta.1
+```
 
 ## Platform Implementation
 Please note that this table represents the functions implemented in this repository and it is possible that changes haven't yet been released on pub.dev
 
-|         | read               | write              | delete             | containsKey        | readAll            | deleteAll          |
-|---------|--------------------|--------------------|--------------------|--------------------|--------------------|--------------------|
-| Android | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| iOS     | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| Windows | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| Linux   | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| macOS   | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| Web     | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+|         | read               | write              | delete             | containsKey        | readAll            | deleteAll          | isCupertinoProtectedDataAvailable | onCupertinoProtectedDataAvailabilityChanged |
+|---------|--------------------|--------------------|--------------------|--------------------|--------------------|--------------------|-----------------------------------|---------------------------------------------|
+| Android | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |                                   |
+| iOS     | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark:                | :white_check_mark:                          |
+| Windows | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |                                   |
+| Linux   | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |                                   |
+| macOS   | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark:                | :white_check_mark: (on macOS 12 and newer)  |
+| Web     | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |                                   |
 
 ## Getting Started
 
@@ -173,3 +168,12 @@ Run the following command from `example` directory
 ```
 flutter drive --target=test_driver/app.dart
 ```
+
+## Contributing
+
+If you want to contribute, you need to initialise the workspace after cloning the repo with `melos` like this:
+```
+flutter pub get
+melos bootstrap
+```
+After that, everything should be set up and working!

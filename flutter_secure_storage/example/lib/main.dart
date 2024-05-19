@@ -17,7 +17,7 @@ class ItemsWidget extends StatefulWidget {
   ItemsWidgetState createState() => ItemsWidgetState();
 }
 
-enum _Actions { deleteAll }
+enum _Actions { deleteAll, isProtectedDataAvailable }
 
 enum _ItemActions { delete, edit, containsKey, read }
 
@@ -61,6 +61,17 @@ class ItemsWidgetState extends State<ItemsWidget> {
     _readAll();
   }
 
+  Future<void> _isProtectedDataAvailable() async {
+    final scaffold = ScaffoldMessenger.of(context);
+    final result = await _storage.isCupertinoProtectedDataAvailable();
+    scaffold.showSnackBar(
+      SnackBar(
+        content: Text('Protected data available: $result'),
+        backgroundColor: result != null && result ? Colors.green : Colors.red,
+      ),
+    );
+  }
+
   Future<void> _addNewItem() async {
     final String key = _randomValue();
     final String value = _randomValue();
@@ -76,7 +87,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
   }
 
   IOSOptions _getIOSOptions() => const IOSOptions(
-        accessibility: KeychainAccessibility.passcode,
+        // accessibility: KeychainAccessibility.passcode,
         accessControlCreateFlags:
             IOSAccessControlCreateFlags.biometryCurrentSet,
       );
@@ -113,6 +124,9 @@ class ItemsWidgetState extends State<ItemsWidget> {
                   case _Actions.deleteAll:
                     _deleteAll();
                     break;
+                  case _Actions.isProtectedDataAvailable:
+                    _isProtectedDataAvailable();
+                    break;
                 }
               },
               itemBuilder: (BuildContext context) => <PopupMenuEntry<_Actions>>[
@@ -120,6 +134,11 @@ class ItemsWidgetState extends State<ItemsWidget> {
                   key: Key('delete_all'),
                   value: _Actions.deleteAll,
                   child: Text('Delete all'),
+                ),
+                const PopupMenuItem(
+                  key: Key('is_protected_data_available'),
+                  value: _Actions.isProtectedDataAvailable,
+                  child: Text('IsProtectedDataAvailable'),
                 ),
               ],
             ),
@@ -259,10 +278,9 @@ class ItemsWidgetState extends State<ItemsWidget> {
         }
         break;
       case _ItemActions.containsKey:
-        if (!context.mounted) return;
         final key = await _displayTextInputDialog(context, item.key);
         final result = await _storage.containsKey(key: key);
-        if (!mounted) return;
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Contains Key: $result, key checked: $key'),
@@ -271,7 +289,6 @@ class ItemsWidgetState extends State<ItemsWidget> {
         );
         break;
       case _ItemActions.read:
-        if (!context.mounted) return;
         final key = await _displayTextInputDialog(context, item.key);
         final result = await _storage.read(
           key: key,
@@ -281,7 +298,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
           ),
           aOptions: _getAndroidOptions(useBiometric: true),
         );
-        if (!mounted) return;
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('value: $result'),

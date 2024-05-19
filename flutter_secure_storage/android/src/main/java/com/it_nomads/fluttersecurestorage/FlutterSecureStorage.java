@@ -36,7 +36,8 @@ public class FlutterSecureStorage {
     private StorageCipherFactory storageCipherFactory;
     private Boolean failedToUseEncryptedSharedPreferences = false;
 
-    public FlutterSecureStorage(Context context) {
+    public FlutterSecureStorage(Context context, Map<String, Object> options) {
+        this.options = options;
         applicationContext = context.getApplicationContext();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -70,12 +71,16 @@ public class FlutterSecureStorage {
         return options.containsKey("useBiometric") && options.get("useBiometric").equals("true");
     }
 
-    boolean containsKey(String key) throws Exception {
+    public boolean containsKey(String key) throws Exception {
         ensureInitialized();
         return preferences.contains(key);
     }
 
-    String read(String key) throws Exception {
+    public String addPrefixToKey(String key) {
+        return ELEMENT_PREFERENCES_KEY_PREFIX + "_" + key;
+    }
+
+    public String read(String key) throws Exception {
         ensureInitialized();
 
         String rawValue = preferences.getString(key, null);
@@ -109,7 +114,7 @@ public class FlutterSecureStorage {
         return all;
     }
 
-    void write(String key, String value) throws Exception {
+    public void write(String key, String value) throws Exception {
         ensureInitialized();
 
         SharedPreferences.Editor editor = preferences.edit();
@@ -131,7 +136,7 @@ public class FlutterSecureStorage {
         editor.apply();
     }
 
-    void deleteAll() throws Exception {
+    public void deleteAll() throws Exception {
         ensureInitialized();
 
         final SharedPreferences.Editor editor = preferences.edit();
@@ -142,25 +147,26 @@ public class FlutterSecureStorage {
         editor.apply();
     }
 
-    @SuppressWarnings({ "ConstantConditions" })
-    private void ensureInitialized () throws Exception {
+   protected void ensureOptions() {
+       if (options.containsKey("sharedPreferencesName") && !((String) options.get("sharedPreferencesName")).isEmpty()) {
+           SHARED_PREFERENCES_NAME = (String) options.get("sharedPreferencesName");
+       }
+
+       if (options.containsKey("masterKeyAlias") && !((String) options.get("masterKeyAlias")).isEmpty()) {
+        masterKeyAlias = (String) options.get("masterKeyAlias");
+    }
+
+       if (options.containsKey("preferencesKeyPrefix") && !((String) options.get("preferencesKeyPrefix")).isEmpty()) {
+           ELEMENT_PREFERENCES_KEY_PREFIX = (String) options.get("preferencesKeyPrefix");
+       }
+    }
+    @SuppressWarnings({"ConstantConditions"})
+    private void ensureInitialized() throws Exception {
         // Check if already initialized.
         // TODO: Disable for now because this will break mixed usage ofsecureSharedPreference
         // if (preferences != null) return;
 
-        if (options.containsKey("sharedPreferencesName")
-                && !((String) options.get("sharedPreferencesName")).isEmpty()) {
-            SHARED_PREFERENCES_NAME = (String) options.get("sharedPreferencesName");
-        }
-
-        if (options.containsKey("masterKeyAlias")
-                && !((String) options.get("masterKeyAlias")).isEmpty()) {
-            masterKeyAlias = (String) options.get("masterKeyAlias");
-        }
-
-        if (options.containsKey("preferencesKeyPrefix") && !((String) options.get("preferencesKeyPrefix")).isEmpty()) {
-            ELEMENT_PREFERENCES_KEY_PREFIX = (String) options.get("preferencesKeyPrefix");
-        }
+        ensureOptions();
 
         SharedPreferences nonEncryptedPreferences = applicationContext.getSharedPreferences(
                 SHARED_PREFERENCES_NAME,

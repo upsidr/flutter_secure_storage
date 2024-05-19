@@ -150,6 +150,13 @@ class FlutterSecureStorageWindows extends FlutterSecureStoragePlatform {
       _backwardCompatible.delete(key: key, options: options);
     }
   }
+
+  // @override
+  // Future<bool> isCupertinoProtectedDataAvailable() => Future.value(true);
+  //
+  // @override
+  // Stream<bool> get onCupertinoProtectedDataAvailabilityChanged =>
+  //     Stream.value(true);
 }
 
 @visibleForTesting
@@ -239,6 +246,8 @@ class DpapiJsonFileMapStorage extends MapStorage {
 
         if (plainTextBlob.ref.pbData.address == NULL) {
           throw WindowsException(
+            // TODO: New member requires win32 ^5.4.0
+            // ignore: deprecated_member_use
             ERROR_OUTOFMEMORY,
             message: 'Failure on CryptUnprotectData()',
           );
@@ -341,6 +350,8 @@ class DpapiJsonFileMapStorage extends MapStorage {
 
       if (encryptedTextBlob.ref.pbData.address == NULL) {
         throw WindowsException(
+          // TODO: New member requires win32 ^5.4.0
+          // ignore: deprecated_member_use
           ERROR_OUTOFMEMORY,
           message: 'Failure on CryptProtectData()',
         );
