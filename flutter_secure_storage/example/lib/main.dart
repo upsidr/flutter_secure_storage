@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
@@ -75,7 +77,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
   Future<void> _addNewItem() async {
     final String key = _randomValue();
     final String value = _randomValue();
-    // print("_addNewItem");
+    print("_addNewItem");
     await FlutterSecureStorage(
       iOptions: _getIOSOptions(),
       aOptions: _getAndroidOptions(useBiometric: true),
@@ -167,7 +169,8 @@ class ItemsWidgetState extends State<ItemsWidget> {
                       iOptions: _getIOSOptions(),
                       aOptions: _getAndroidOptions(useBiometric: true),
                     );
-                    // print(v);
+
+                    print(v);
                   },
                 ),
                 TextButton(
