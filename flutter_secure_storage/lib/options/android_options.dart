@@ -91,7 +91,7 @@ class AndroidOptions extends Options {
         'storageCipherAlgorithm': describeEnum(_storageCipherAlgorithm),
         'sharedPreferencesName': sharedPreferencesName ?? '',
         'preferencesKeyPrefix': preferencesKeyPrefix ?? '',
-        'masterKeyAlias': _masterKeyAlias ?? '',
+        'masterKeyAlias': _masterKeyAlias,
         'useBiometric': '$_useBiometric',
         'authenticationValidityDurationSeconds':
             '$_authenticationValidityDurationSeconds',

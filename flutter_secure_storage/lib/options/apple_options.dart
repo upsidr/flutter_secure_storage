@@ -53,6 +53,6 @@ abstract class AppleOptions extends Options {
         if (_groupId != null) 'groupId': _groupId!,
         'synchronizable': '$_synchronizable',
         if (_accessControlCreateFlags != null)
-          'accessControlCreateFlags': describeEnum(_accessControlCreateFlags!),
+          'accessControlCreateFlags': _accessControlCreateFlags!.name,
       };
 }
