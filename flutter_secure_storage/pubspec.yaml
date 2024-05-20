@@ -4,7 +4,7 @@ version: 9.2.1
 repository: https://github.com/mogol/flutter_secure_storage/tree/develop/flutter_secure_storage
 
 environment:
-  sdk: ">=2.12.0 <4.0.0"
+  sdk: ">=2.15.0 <4.0.0"
   flutter: ">=2.0.0"
 
 flutter:
