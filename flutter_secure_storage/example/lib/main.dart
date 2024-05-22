@@ -46,7 +46,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
   Future<void> _readAll() async {
     final all = await _storage.readAll(
       iOptions: _getIOSOptions(),
-      aOptions: _getAndroidOptions(useBiometric: true),
+      aOptions: _getAndroidOptions(useBiometric: false),
     );
     setState(() {
       _items = all.entries
@@ -58,7 +58,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
   Future<void> _deleteAll() async {
     await _storage.deleteAll(
       iOptions: _getIOSOptions(),
-      aOptions: _getAndroidOptions(useBiometric: true),
+      aOptions: _getAndroidOptions(useBiometric: false),
     );
     _readAll();
   }
@@ -80,7 +80,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
     print("_addNewItem");
     await FlutterSecureStorage(
       iOptions: _getIOSOptions(),
-      aOptions: _getAndroidOptions(useBiometric: true),
+      aOptions: _getAndroidOptions(useBiometric: false),
     ).write(
       key: key,
       value: value,
@@ -157,7 +157,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
                       key: "TEST_KEY",
                       value: "TEST_VALUE",
                       iOptions: _getIOSOptions(),
-                      aOptions: _getAndroidOptions(useBiometric: true),
+                      aOptions: _getAndroidOptions(useBiometric: false),
                     );
                   },
                 ),
@@ -167,7 +167,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
                     final v = await _storage.read(
                       key: "TEST_KEY",
                       iOptions: _getIOSOptions(),
-                      aOptions: _getAndroidOptions(useBiometric: true),
+                      aOptions: _getAndroidOptions(useBiometric: false),
                     );
 
                     print(v);
@@ -179,7 +179,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
                     await _storage.delete(
                       key: "TEST_KEY",
                       iOptions: _getIOSOptions(),
-                      aOptions: _getAndroidOptions(useBiometric: true),
+                      aOptions: _getAndroidOptions(useBiometric: false),
                     );
                   },
                 ),
@@ -259,7 +259,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
         await _storage.delete(
           key: item.key,
           iOptions: _getIOSOptions(),
-          aOptions: _getAndroidOptions(useBiometric: true),
+          aOptions: _getAndroidOptions(useBiometric: false),
         );
         _readAll();
 
@@ -275,7 +275,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
             key: item.key,
             value: result,
             iOptions: _getIOSOptions(),
-            aOptions: _getAndroidOptions(useBiometric: true),
+            aOptions: _getAndroidOptions(useBiometric: false),
           );
           _readAll();
         }
@@ -299,7 +299,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
             accessibility: KeychainAccessibility.passcode,
             // accessControlCreateFlags: null,
           ),
-          aOptions: _getAndroidOptions(useBiometric: true),
+          aOptions: _getAndroidOptions(useBiometric: false),
         );
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
