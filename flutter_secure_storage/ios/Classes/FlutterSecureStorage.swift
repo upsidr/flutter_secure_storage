@@ -188,7 +188,7 @@ class FlutterSecureStorage{
         // When calling "read", authentication is always performed, so remove it and proceed with the writing.
         var keychainQuery = baseQuery(key: key, groupId: groupId, accountName: accountName, synchronizable: synchronizable, accessibility: accessibility, returnData: nil, accessControl: accessControlCreateWithFlags)
         
-        let resp = delete(key: key, groupId: groupId, accountName: accountName, synchronizable: synchronizable, accessibility: nil)
+        let resp = delete(key: key, groupId: groupId, accountName: accountName, synchronizable: synchronizable, accessibility: accessibility)
         
         
          let errType = OSStatusType(rawValue: resp.status!)
