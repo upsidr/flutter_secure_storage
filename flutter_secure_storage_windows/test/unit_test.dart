@@ -23,9 +23,11 @@ void main() {
       directory
           .listSync(followLinks: false)
           .whereType<File>()
-          .where((f) =>
-              path.basename(f.path) == encryptedJsonFileName ||
-              f.path.endsWith('.secure'),)
+          .where(
+            (f) =>
+                path.basename(f.path) == encryptedJsonFileName ||
+                f.path.endsWith('.secure'),
+          )
           .forEach((f) => f.deleteSync());
     }
   }
@@ -738,7 +740,8 @@ void main() {
           switch (call.method) {
             case 'containsKey':
               containsKeyCalled++;
-              return deleteCalled > 0 && (call.arguments as Map<String, dynamic>)['key'] == key;
+              return deleteCalled > 0 &&
+                  (call.arguments as Map<String, dynamic>)['key'] == key;
             case 'delete':
               deleteCalled++;
               return null;

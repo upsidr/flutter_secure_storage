@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
@@ -17,7 +19,7 @@ class ItemsWidget extends StatefulWidget {
   ItemsWidgetState createState() => ItemsWidgetState();
 }
 
-enum _Actions { deleteAll }
+enum _Actions { deleteAll, isProtectedDataAvailable }
 
 enum _ItemActions { delete, edit, containsKey, read }
 
@@ -44,7 +46,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
   Future<void> _readAll() async {
     final all = await _storage.readAll(
       iOptions: _getIOSOptions(),
-      aOptions: _getAndroidOptions(useBiometric: true),
+      aOptions: _getAndroidOptions(useBiometric: false),
     );
     setState(() {
       _items = all.entries
@@ -56,9 +58,20 @@ class ItemsWidgetState extends State<ItemsWidget> {
   Future<void> _deleteAll() async {
     await _storage.deleteAll(
       iOptions: _getIOSOptions(),
-      aOptions: _getAndroidOptions(useBiometric: true),
+      aOptions: _getAndroidOptions(useBiometric: false),
     );
     _readAll();
+  }
+
+  Future<void> _isProtectedDataAvailable() async {
+    final scaffold = ScaffoldMessenger.of(context);
+    final result = await _storage.isCupertinoProtectedDataAvailable();
+    scaffold.showSnackBar(
+      SnackBar(
+        content: Text('Protected data available: $result'),
+        backgroundColor: result != null && result ? Colors.green : Colors.red,
+      ),
+    );
   }
 
   Future<void> _addNewItem() async {
@@ -67,7 +80,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
     print("_addNewItem");
     await FlutterSecureStorage(
       iOptions: _getIOSOptions(),
-      aOptions: _getAndroidOptions(useBiometric: true),
+      aOptions: _getAndroidOptions(useBiometric: false),
     ).write(
       key: key,
       value: value,
@@ -93,8 +106,8 @@ class ItemsWidgetState extends State<ItemsWidget> {
         authenticationValidityDurationSeconds: 20,
       );
 
-  String? _getAccountName() =>
-      _accountNameController.text.isEmpty ? null : _accountNameController.text;
+  // String? _getAccountName() =>
+  //     _accountNameController.text.isEmpty ? null : _accountNameController.text;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -113,6 +126,9 @@ class ItemsWidgetState extends State<ItemsWidget> {
                   case _Actions.deleteAll:
                     _deleteAll();
                     break;
+                  case _Actions.isProtectedDataAvailable:
+                    _isProtectedDataAvailable();
+                    break;
                 }
               },
               itemBuilder: (BuildContext context) => <PopupMenuEntry<_Actions>>[
@@ -120,6 +136,11 @@ class ItemsWidgetState extends State<ItemsWidget> {
                   key: Key('delete_all'),
                   value: _Actions.deleteAll,
                   child: Text('Delete all'),
+                ),
+                const PopupMenuItem(
+                  key: Key('is_protected_data_available'),
+                  value: _Actions.isProtectedDataAvailable,
+                  child: Text('IsProtectedDataAvailable'),
                 ),
               ],
             ),
@@ -136,7 +157,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
                       key: "TEST_KEY",
                       value: "TEST_VALUE",
                       iOptions: _getIOSOptions(),
-                      aOptions: _getAndroidOptions(useBiometric: true),
+                      aOptions: _getAndroidOptions(useBiometric: false),
                     );
                   },
                 ),
@@ -146,8 +167,9 @@ class ItemsWidgetState extends State<ItemsWidget> {
                     final v = await _storage.read(
                       key: "TEST_KEY",
                       iOptions: _getIOSOptions(),
-                      aOptions: _getAndroidOptions(useBiometric: true),
+                      aOptions: _getAndroidOptions(useBiometric: false),
                     );
+
                     print(v);
                   },
                 ),
@@ -157,7 +179,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
                     await _storage.delete(
                       key: "TEST_KEY",
                       iOptions: _getIOSOptions(),
-                      aOptions: _getAndroidOptions(useBiometric: true),
+                      aOptions: _getAndroidOptions(useBiometric: false),
                     );
                   },
                 ),
@@ -237,7 +259,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
         await _storage.delete(
           key: item.key,
           iOptions: _getIOSOptions(),
-          aOptions: _getAndroidOptions(useBiometric: true),
+          aOptions: _getAndroidOptions(useBiometric: false),
         );
         _readAll();
 
@@ -253,16 +275,15 @@ class ItemsWidgetState extends State<ItemsWidget> {
             key: item.key,
             value: result,
             iOptions: _getIOSOptions(),
-            aOptions: _getAndroidOptions(useBiometric: true),
+            aOptions: _getAndroidOptions(useBiometric: false),
           );
           _readAll();
         }
         break;
       case _ItemActions.containsKey:
-        if (!context.mounted) return;
         final key = await _displayTextInputDialog(context, item.key);
         final result = await _storage.containsKey(key: key);
-        if (!mounted) return;
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Contains Key: $result, key checked: $key'),
@@ -271,17 +292,16 @@ class ItemsWidgetState extends State<ItemsWidget> {
         );
         break;
       case _ItemActions.read:
-        if (!context.mounted) return;
         final key = await _displayTextInputDialog(context, item.key);
         final result = await _storage.read(
           key: key,
           iOptions: const IOSOptions(
             accessibility: KeychainAccessibility.passcode,
-            accessControlCreateFlags: null,
+            // accessControlCreateFlags: null,
           ),
-          aOptions: _getAndroidOptions(useBiometric: true),
+          aOptions: _getAndroidOptions(useBiometric: false),
         );
-        if (!mounted) return;
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('value: $result'),
