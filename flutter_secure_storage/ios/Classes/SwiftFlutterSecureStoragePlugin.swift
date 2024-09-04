@@ -128,14 +128,14 @@ public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin, FlutterSt
     
     private func deleteAll(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         let values = parseCall(call)
-        let response = flutterSecureStorageManager.deleteAll(groupId: values.groupId, accountName: values.accountName, synchronizable: values.synchronizable)
+        let response = flutterSecureStorageManager.deleteAll(groupId: values.groupId, accountName: values.accountName, synchronizable: values.synchronizable, accessibility: values.accessibility)
         
         handleResponse(values.key, response, result)
     }
     
     private func readAll(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         let values = parseCall(call)
-        let response = flutterSecureStorageManager.readAll(groupId: values.groupId, accountName: values.accountName, synchronizable: values.synchronizable)
+        let response = flutterSecureStorageManager.readAll(groupId: values.groupId, accountName: values.accountName, synchronizable: values.synchronizable, accessibility: values.accessibility)
         
         handleResponse(values.key, response, result)
     }

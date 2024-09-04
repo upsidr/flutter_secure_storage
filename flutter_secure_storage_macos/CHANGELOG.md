@@ -1,3 +1,6 @@
+## 3.1.2
+Fixed an issue which caused the readAll and deleteAll to not work properly.
+
 ## 3.1.1
 Fixed an issue which caused a platform exception when the key does not exists in the keychain.
 
