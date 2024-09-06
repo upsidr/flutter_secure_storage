@@ -1,3 +1,6 @@
+## 9.2.2
+[iOS, macOS] Fixed an issue which caused the readAll and deleteAll to not work properly.
+
 ## 9.2.1
 * Fix async race condition bug in storage operations.
 * [macOS] Return nil on macOS if key is not found
